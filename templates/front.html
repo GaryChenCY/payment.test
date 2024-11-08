@@ -12,34 +12,32 @@
 </head>
 
 <body>
-    <!-- 页面主体 -->
     <div class="container my-5">
-        <!-- 页面标题 -->
         <h1 class="text-center">線上支付</h1>
         <p class="text-center">使用 Stripe 金流進行安全的線上支付，幣別為 TWD。</p>
 
-        <!-- 支付表单 -->
+        <!-- 支付表單 -->
         <div class="row justify-content-center">
             <div class="col-lg-6">
                 <div class="card">
                     <div class="card-body">
-                        <!-- 支付表单 -->
+                        <!-- 支付表單 -->
                         <form id="payment-form">
-                            <!-- 支付金额输入框 -->
+                            <!-- 支付金額輸入框 -->
                             <div class="mb-3">
                                 <label for="amount" class="form-label">支付金額 (TWD)</label>
                                 <input type="number" id="amount" class="form-control" placeholder="請輸入支付金額" required>
                             </div>
 
-                            <!-- Stripe 卡片信息输入 -->
+                            <!-- Stripe 卡片輸入 -->
                             <div id="card-element" class="form-control mb-3">
-                                <!-- 这个 div 是 Stripe Elements 用于生成卡片输入组件的容器 -->
+                                <!-- Stripe Elements 用於生成卡片輸入组件的容器 -->
                             </div>
 
-                            <!-- 错误信息展示区域 -->
+                            <!-- show錯誤訊息 -->
                             <div id="card-errors" role="alert" class="text-danger"></div>
 
-                            <!-- 提交按钮 -->
+
                             <button id="submit" class="btn btn-primary w-100">立即支付</button>
                         </form>
                     </div>
@@ -48,18 +46,18 @@
         </div>
     </div>
 
-    <!-- 引入 Bootstrap 的 JavaScript 及 Popper.js 用于处理弹窗等组件 -->
+    <!-- 引入 Bootstrap 的 JavaScript 及 Popper.js 處理弹窗等组件 -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Stripe 支付功能逻辑 -->
+    <!-- Stripe 支付功能邏輯 -->
     <script>
-        // 创建 Stripe 对象并使用你的公开密钥
+        // 創建 Stripe 公開密鑰
         const stripe = Stripe('pk_test_51QBrlCByxTEIQfBX8oNgsBf0zd17URTdfnzPoMANXKfDacAGLU9Re1qn61HlwfzgnSI6x6zQ8ydTPyXRPY7StGbe004f6rAZpT');
 
-        // 创建 Stripe Elements 对象，用于生成表单
+        // 創建 Stripe Elements 對象，用於生成表單
         const elements = stripe.elements();
 
-        // 自定义表单样式
+        // 自定表單樣式
         const style = {
             base: {
                 color: "#32325d",
@@ -67,58 +65,58 @@
                 fontSmoothing: "antialiased",
                 fontSize: "16px",
                 "::placeholder": {
-                    color: "#aab7c4"  // 占位符颜色
+                    color: "#aab7c4"
                 }
             },
             invalid: {
-                color: "#fa755a",  // 输入无效时的颜色
-                iconColor: "#fa755a"  // 图标颜色
+                color: "#fa755a",  // 輸入無效顏色
+                iconColor: "#fa755a"
             }
         };
 
-        // 创建卡片输入组件，并应用自定义样式
+        
         const card = elements.create('card', { style: style });
 
-        // 将卡片组件挂载到指定的 div 中（即 #card-element）
+        // 將卡片组件掛載到指定的 div 中（即 #card-element）
         card.mount('#card-element');
 
-        // 处理表单提交逻辑
+        // 提交邏輯
         const form = document.getElementById('payment-form');
         form.addEventListener('submit', async function (event) {
-            // 阻止表单的默认提交行为
+            // 阻止表單的默認提交行為
             event.preventDefault();
 
-            // 创建支付方法（卡片支付），并获取 paymentMethod
+            // 創建支付方法（卡片支付）、獲取 paymentMethod
             const { paymentMethod, error } = await stripe.createPaymentMethod({
                 type: 'card',
                 card: card,
             });
 
             if (error) {
-                // 如果创建支付方法时出错，显示错误信息
+                // 創建支付方法時出錯，show error
                 const errorElement = document.getElementById('card-errors');
                 errorElement.textContent = error.message;
             } else {
-                // 如果成功，发送请求到服务器进行支付处理
-                const amount = document.getElementById('amount').value;  // 获取支付金额
+                // 成功，發送請求進行支付處理
+                const amount = document.getElementById('amount').value;
                 fetch('/create-payment-intent', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         payment_method_id: paymentMethod.id,  // 支付方法 ID
-                        amount: amount  // 支付金额
+                        amount: amount
                     })
                 })
                 .then(function(response) {
-                    return response.json();  // 解析响应
+                    return response.json();
                 })
                 .then(function(paymentIntentResult) {
                     if (paymentIntentResult.error) {
-                        // 处理服务器端错误
+                        // 處理服務器端錯誤
                         document.getElementById('card-errors').textContent = paymentIntentResult.error;
                     } else {
-                        // 支付成功后的提示或跳转
-                        alert('支付成功！');
+                        // 付款成功的提示
+                        alert('付款成功！');
                     }
                 });
             }
